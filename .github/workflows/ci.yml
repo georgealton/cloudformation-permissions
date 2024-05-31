@@ -1,0 +1,52 @@
+name: Continuous Integration
+
+on:
+  push:
+    # branches-ignore:
+    #   - main
+
+env:
+  # GitHub Actions Runner is not a tty therefore lots of tools disable colour
+  # The webview supports ANSI colour so we try to add colour support here
+  #| env var                         | supported by      |
+  FORCE_COLOR: "true"                # nox,pip,pytest,mypy
+  PRE_COMMIT_COLOR: "always"         # pre-commit
+
+jobs:
+  static-analysis:
+    runs-on: ubuntu-latest
+    name: Static Analysis
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+  unit-tests:
+    runs-on: ubuntu-latest
+    name: Unit Tests
+    steps:
+      - uses: actions/checkout@v4
+      - uses: eifinger/setup-rye@v3
+        with:
+          version: '0.34.0'
+      - run: rye fetch
+      - run: rye sync --no-lock
+      - run: rye run nox --python ${{matrix.python-version}}
+
+  github-actions-integration-tests:
+    runs-on: ubuntu-latest
+    name: GitHub Actions Integration Tests
+    permissions:
+      id-token: write
+      security-events: write
+      actions: read
+      contents: read
+    environment: main
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::531249009620:role/Deploy
+          aws-region: eu-west-1
+      - uses: ./
