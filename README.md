@@ -10,16 +10,23 @@ To generate findings, iam-sarif-report makes AWS API requests. The AWS Principal
 {
     "Effect": "Allow",
     "Action":[
-        "iam:SimulatePrincipalPolicy",
-        "iam:GetContextKeysForPrincipalPolicy"
+        "sts:GetCallerIdentity",
     ],
     "Resource": "*"
 },
 {
     "Effect": "Allow",
     "Action":[
-        "cloudformation:ListStackResources",
-        "cloudformation:GetTemplate"
+        "iam:GetContextKeysForPrincipalPolicy",
+        "iam:SimulatePrincipalPolicy"
+    ],
+    "Resource": "*"
+},
+{
+    "Effect": "Allow",
+    "Action":[
+        "cloudformation:GetTemplate",
+        "cloudformation:ListStackResources"
     ],
     "Resource": "*"
 }
@@ -47,7 +54,6 @@ jobs:
           role-to-assume: arn:aws:iam::111111111111:role/my-github-actions-role-test
           aws-region: eu-west-1
 
-      # validate some policies and write a SARIF result file
       - uses: georgealton/can-i-stack-it@v2
 ```
 

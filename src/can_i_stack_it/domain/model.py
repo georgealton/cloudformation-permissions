@@ -1,5 +1,6 @@
 from enum import StrEnum, auto
 from dataclasses import dataclass
+from typing import NewType
 
 
 class PermissionStatus(StrEnum):
@@ -8,7 +9,7 @@ class PermissionStatus(StrEnum):
     UNKNOWN = auto()
 
 
-Action = type[str]
+Action = NewType("Action", str)
 
 
 @dataclass
@@ -24,7 +25,7 @@ class ShortResourceInfo:
 
 
 @dataclass
-class TemplatePermissionsSummary:
+class TemplateResourcesPermissionsSummary:
     source: str
 
     def verify(

@@ -14,7 +14,9 @@ from can_i_stack_it.adapters import iam
                 "sts:GetCallerIdentity",
             ],
             [
-                ActionPermission(Action("sts:GetCallerIdentity"), PermissionStatus.ALLOWED),
+                ActionPermission(
+                    Action("sts:GetCallerIdentity"), PermissionStatus.ALLOWED
+                ),
             ],
         ),
         (
@@ -33,7 +35,9 @@ from can_i_stack_it.adapters import iam
                 "ec2:RunInstances",
             ],
             [
-                ActionPermission(Action("sts:GetCallerIdentity"), PermissionStatus.ALLOWED),
+                ActionPermission(
+                    Action("sts:GetCallerIdentity"), PermissionStatus.ALLOWED
+                ),
                 ActionPermission(Action("ec2:RunInstances"), PermissionStatus.DENIED),
             ],
         ),

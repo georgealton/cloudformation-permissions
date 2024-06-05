@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 
+
 class Command: ...
+
 
 @dataclass
 class ListPermissions(Command):
@@ -10,4 +12,4 @@ class ListPermissions(Command):
 @dataclass
 class VerifyPermissions(Command):
     TemplateSource: str
-    Role: str
+    Role: str | None

@@ -1,24 +1,27 @@
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import Self, get_type_hints
+from typing import Protocol, Self, get_type_hints
 
-from ..adapters.iam import IAMAdapter
-from ..adapters.cloudformation import CloudFormation
+from ..adapters.iam import IAMProtocol
+from ..adapters.cloudformation import CloudFormationProtocol
+from ..adapters.sts import STSProtocol
 from ..domain.commands import Command, ListPermissions, VerifyPermissions
 
-class Handler:
+
+class Handler(Protocol):
     __registry: dict[type[Command], type[Self]] = {}
     registry = MappingProxyType(__registry)
 
-    def __init_subclass__(cls) -> None:
-        command_type: type[commands.Command] = get_type_hints(cls.__call__)["command"]
-        Handler.__registry[command_type] = cls
+    def __init_subclass__(CommandHandler) -> None:
+        command_type: type[Command] = get_type_hints(CommandHandler.__call__)["command"]
+        Handler.__registry[command_type] = CommandHandler
 
     def __call__(self, command: Command) -> None: ...
 
+
 @dataclass
 class HandleListPermissions(Handler):
-    cloudformation: CloudFormation
+    cloudformation: CloudFormationProtocol
 
     def __call__(self, command: ListPermissions):
         template_source = command.TemplateSource
@@ -27,12 +30,14 @@ class HandleListPermissions(Handler):
 
 @dataclass
 class HandleVerifyPermissions(Handler):
-    CloudFormation: CloudFormation
-    IAM: IAMAdapter
+    cloudformation: CloudFormationProtocol
+    iam: IAMProtocol
+    sts: STSProtocol
 
     def __call__(self, command: VerifyPermissions):
         template_source = command.TemplateSource
-        role = command.Role
+        if (role := command.Role) is None:
+            role = self.sts()
 
-        self.CloudFormation.get_template_resources(template_source)
-        self.IAM.simulate(role)
+        self.cloudformation.get_template_resources(template_source)
+        self.iam.simulate(role)

@@ -13,19 +13,25 @@ class IAMEvaluationResult(TypedDict):
 
 
 @dataclass(frozen=True)
-class IAMAdapter(Protocol):
+class IAMProtocol(Protocol):
     client: Any
 
     def simulate(
-        self, role: str, actions: Iterable[str]
+        self,
+        role: str,
+        actions: Iterable[str],
     ) -> Iterable[ActionPermission]: ...
 
 
 @dataclass(frozen=True)
-class IAM(IAMAdapter):
+class IAM(IAMProtocol):
     client: Any
 
-    def simulate(self, role: str, actions: Iterable[str]) -> Iterable[ActionPermission]:
+    def simulate(
+        self,
+        role: str,
+        actions: Iterable[str],
+    ) -> Iterable[ActionPermission]:
         paginator = self.client.get_paginator("simulate_principal_policy")
         for page in paginator.paginate(PolicySourceArn=role, ActionNames=list(actions)):
             for result in page["EvaluationResults"]:
