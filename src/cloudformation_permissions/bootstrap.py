@@ -23,24 +23,32 @@ def bootstrap(
     container = punq.Container()
 
     _session = session.Session()
-    container.register(cloudformation.CloudFormationClient, instance=_session.client("cloudformation"))
+    container.register(cloudformation.CloudFormationClient,
+                       instance=_session.client("cloudformation"))
     container.register(iam.IAMClient, instance=_session.client("iam"))
     container.register(sts.STSClient, instance=_session.client("sts"))
 
     container.register(iam.IAMProtocol, iam.IAM)
     container.register(sts.STSProtocol, sts.STS)
 
-    container.register(ServiceAuthorizationReferenceProcotol, ServiceAuthorizationReferenceLocal)
+    container.register(
+        ServiceAuthorizationReferenceProcotol,
+        ServiceAuthorizationReferenceLocal,
+    )
 
     match template_source:
         case ARN() as stack if stack.resource.startswith("stack/"):
-            container.register(template_loader.TemplateResourceLoaderProtocol, template_loader.StackAdapter)
+            container.register(
+                template_loader.TemplateResourceLoaderProtocol, template_loader.StackAdapter)
         case ARN() as changeset if changeset.resource.startswith("changeSet/"):
-            container.register(template_loader.TemplateResourceLoaderProtocol, template_loader.ChangeSetAdapter)
+            container.register(
+                template_loader.TemplateResourceLoaderProtocol, template_loader.ChangeSetAdapter)
         case Path():
-            container.register(template_loader.TemplateResourceLoaderProtocol, template_loader.LocalAdapter)
+            container.register(
+                template_loader.TemplateResourceLoaderProtocol, template_loader.LocalAdapter)
         case _:
-            container.register(template_loader.TemplateResourceLoaderProtocol, template_loader.LocalAdapter)
+            container.register(
+                template_loader.TemplateResourceLoaderProtocol, template_loader.LocalAdapter)
 
     container.register(
         permissions_resolver.ResourceInformationResolverProtocol, permissions_resolver.ResourceInformationResolver
