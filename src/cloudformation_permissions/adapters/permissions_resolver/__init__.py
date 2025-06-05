@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Literal, Protocol, TypedDict, assert_never
 
 from attrs import define
 from botocore.exceptions import ClientError
-from cloudformation_permissions.adapters.sar import ServiceAuthorizationReference
+from cloudformation_permissions.adapters.sar import ServiceAuthorizationReference, ServiceAuthorizationReferenceProcotol
 from result import Err, Ok, Result, as_result
 
 from cloudformation_permissions.domain.model import PermissionsLevels
@@ -68,7 +68,7 @@ class DefaultDictKey[K, V](dict[K, V]):
 @define
 class ResourceInformationResolver(ResourceInformationResolverProtocol):
     client: CloudFormationClient
-    reference: ServiceAuthorizationReference
+    reference: ServiceAuthorizationReferenceProcotol
 
     @staticmethod
     def _is_module(resource_type_name: str):
@@ -105,8 +105,8 @@ class ResourceInformationResolver(ResourceInformationResolverProtocol):
 
         # filter out permissons that do not exist in the reference
         # some handlers have invalid or outdated permissions
-        filtered_permissions = [p for p in permissions if self.reference.list_actions_by_pattern(p)]
-        return Ok(filtered_permissions)
+        valid_permissions = [p for p in permissions if self.reference.list_actions_by_pattern(p)]
+        return Ok(valid_permissions)
 
     def resolve(self, resource_type: str, permission_level: str) -> Result[frozenset[Permission], LookupError]:
         schema_result = self.resource_schemas[resource_type]

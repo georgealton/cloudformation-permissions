@@ -64,7 +64,8 @@ class ServiceAuthorizationReferenceProcotol(Protocol):
 
 
 class ServiceAuthorizationReferenceLocal(ServiceAuthorizationReferenceProcotol):
-    def __init__(self, path: pathlib.Path):
+    def __init__(self):
+        path = pathlib.Path("/tmp/auth.json")
         self.index: ServiceAuthorizationReference = json.loads(path.read_text())
         self.list_actions_by_pattern = cache(self._list_actions_by_pattern)
 

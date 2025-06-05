@@ -62,3 +62,8 @@ allow-direct-references = true
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/cloudformation_permissions"]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.0",
+]
